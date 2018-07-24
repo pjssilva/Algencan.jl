@@ -16,21 +16,6 @@ module Algencan
 # end
 # amplexe = joinpath(dirname(libipopt), "..", "bin", "ipopt")
 
-# Compiles to the *static* path of the algencan library
-const algencan_lib_path = string(joinpath(ENV["ALGENCAN_LIB_DIR"],
-    "libalgencan.so"))
-# TODO: I don't know how to start and itegrate the automatic build. I
-# tried the code below guessing from Ipopt code and it didn't work.
-# if isfile(joinpath(dirname(@__FILE__),"..","deps","deps.jl"))
-#     include("../deps/deps.jl")
-#     const algencan_lib_path = 
-
-# else
-#     const algencan_lib_path = string(joinpath(ENV["ALGENCAN_LIB_DIR"], 
-#         "libalgencan.so"))
-# end
-
-
 # Global to avoid closures as Algencan does not allow to send user information
 # back to call backs. Long names to avoid conflicts.
 global current_algencan_problem
@@ -598,7 +583,7 @@ function optimize!(model::AlgencanMathProgModel)
     inform = Vector{Cint}([0])
 
     ccall(
-        (:c_algencan, algencan_lib_path),                # library
+        (:c_algencan, "libalgencan.so"),                 # library
         Void,                                            # Return type
         (                                                # Parameters types
             Ptr{Void},                                   # *myevalf,
