@@ -13,12 +13,12 @@ srcpath = joinpath(depspath, "src")
 # Set HSL for compilation if necessary
 compilehsl = "MA57_SOURCE" in keys(ENV)
 if compilehsl
-  libmetis4 = library_dependency("libmetis")
-  metispath = joinpath(BinDeps.depsdir(libmetis4), "src", "metis-4.0.3")
-  provides(Sources, URI("http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/OLD/metis-4.0.3.tar.gz"), libmetis4, unpackedpath="metis-4.0.3")
+  metispath = joinpath(BinDeps.depsdir(libalgencan), "src", "metis-4.0.3")
+  metistarpath = joinpath(BinDeps.depsdir(libalgencan), "downloads", "metis-4.0.3.tar.gz")
+  ENV["METISPATH"] = metispath
+
   ma57_src = ENV["MA57_SOURCE"]
   ma57path = joinpath(BinDeps.depsdir(libalgencan), "src", "hsl_ma57-5.2.0")
-  ENV["METISPATH"] = metispath
   ENV["MA57PATH"] = ma57path
 end
 
@@ -26,12 +26,13 @@ if compilehsl
   # Build Algencan with HSL
   provides(SimpleBuild,
     (@build_steps begin
-        # Get Metis sources and unpack
         ChangeDirectory(BinDeps.depsdir(libalgencan))
-        GetSources(libmetis4)
-        `tar xf downloads/metis-4.0.3.tar.gz --directory=$srcpath`
+        # Get Algencan sources and unpack
         GetSources(libalgencan)
         `tar xf downloads/algencan-3.1.1.tgz --directory=$srcpath`
+        # Get Metis sources and unpack
+        FileDownloader("http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/OLD/metis-4.0.3.tar.gz", metistarpath)
+        `tar xf downloads/metis-4.0.3.tar.gz --directory=$srcpath`
 
         # Unpack HSL sources
         CreateDirectory(ma57path)
@@ -40,14 +41,14 @@ if compilehsl
         # Build Metis
         @build_steps begin
           ChangeDirectory(metispath)
-          `make COPTIONS=-fPIC`
+          `make COPTIONS="-fPIC -O3"`
         end
 
         # Build HSL
         @build_steps begin
           ChangeDirectory(ma57path)
           `patch -p1 -i../../patches/patch_ma57.txt`
-          `./configure --with-metis=$metispath/libmetis.a --prefix=$ma57path CFLAGS=-fPIC FCFLAGS=-fPIC FFLAGS=-fPIC`
+          `./configure --with-metis=$metispath/libmetis.a --prefix=$ma57path CFLAGS="-fPIC -O3" FCFLAGS="-fPIC -O3" FFLAGS="-fPIC -O3"`
           `make`
           `make install`
         end
@@ -78,10 +79,10 @@ if compilehsl
 else
   provides(SimpleBuild,
     (@build_steps begin
-        Compat.@warn "WARNING: You are installing Algencan.jl without HSL libraries."
-        Compat.@warn "WARNING: This might preclude good performance."
-        Compat.@warn "WARNING: If you can, try to use HSL."
-        Compat.@warn "WARNING: See details in the installation section at https://github.com/pjssilva/Algencan.jl ."
+        Compat.@warn "You are installing Algencan.jl without HSL libraries."
+        Compat.@warn "This might preclude good performance."
+        Compat.@warn "If you can, try to use HSL."
+        Compat.@warn "See details in the installation section at https://github.com/pjssilva/Algencan.jl ."
 
         # Get Algencan sources and unpack
         GetSources(libalgencan)
