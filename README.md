@@ -1,5 +1,9 @@
 # Algencan.jl
 
+**I am deprecating this project in favor of 
+[NLPModelsAlgencan.jl](https://github.com/pjssilva/NLPModelsAlgencan.jl). 
+All further development will happen there.**
+
 **Algencan.jl** is a [JuMP / MathProgBase](https://www.juliaopt.org/) interface
 to the [Algencan](https://www.ime.usp.br/~egbirgin/tango/codes.php)
 nonlinear solver.
